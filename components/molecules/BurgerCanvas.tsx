@@ -5,7 +5,6 @@ import { OrbitControls, Stage, ContactShadows } from '@react-three/drei/native';
 import { useBurger } from '../../modules/builder/context/BurgerContext';
 import BurgerModel from './BurgerModel';
 
-// Etiquetas para evitar el berrinche de TS
 const AmbientLight = 'ambientLight' as any;
 const PointLight = 'pointLight' as any;
 
@@ -16,24 +15,32 @@ export default function BurgerCanvas() {
     <View style={styles.container}>
       <Canvas
         shadows
-        camera={{ position: [0, 2, 5], fov: 40 }}
+        camera={{ position: [0, 2, 4], fov: 40 }}
       >
         <Suspense fallback={null}>
           <AmbientLight intensity={0.7} />
           <PointLight position={[10, 10, 10]} intensity={1} />
           
-          {/* Corregido: Se eliminó contactShadow que causaba error de tipos */}
+          {/* Eliminado el parámetro erróneo contactShadow */}
           <Stage adjustCamera={true} environment="city" intensity={0.5}>
              <BurgerModel stack={stack} />
           </Stage>
 
-          {/* Usamos este para las sombras en el suelo, es más compatible */}
-          <ContactShadows opacity={0.4} scale={10} blur={2.5} far={4} />
+          <ContactShadows 
+            position={[0, -0.05, 0]} 
+            opacity={0.4} 
+            scale={10} 
+            blur={2.5} 
+            far={1} 
+          />
           
           <OrbitControls 
-            enablePan={false} 
-            minPolarAngle={Math.PI / 4} 
-            maxPolarAngle={Math.PI / 2} 
+            makeDefault 
+            enablePan={false}
+            minPolarAngle={Math.PI / 6}
+            maxPolarAngle={Math.PI / 1.8}
+            enableDamping={true}
+            dampingFactor={0.1}
           />
         </Suspense>
       </Canvas>

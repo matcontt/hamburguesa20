@@ -4,7 +4,7 @@ import { IngredientType } from '../../../lib/core/config';
 interface BurgerContextType {
   stack: IngredientType[];
   addIngredient: (type: IngredientType) => void;
-  removeIngredient: (index: number) => void;
+  removeIngredient: (type: IngredientType) => void;
   setStack: React.Dispatch<React.SetStateAction<IngredientType[]>>;
 }
 
@@ -14,16 +14,27 @@ export const BurgerProvider = ({ children }: { children: React.ReactNode }) => {
   const [stack, setStack] = useState<IngredientType[]>(['panAbajo', 'panArriba']);
 
   const addIngredient = (type: IngredientType) => {
+    if (type === 'panArriba' || type === 'panAbajo') return;
+
     setStack((prev) => {
-      const newStack = [...prev];
-      // Insertamos antes del pan de arriba (última posición)
-      newStack.splice(newStack.length - 1, 0, type);
-      return newStack;
+      // Usamos "as any" o casting específico para evitar el error de comparación de tipos
+      const fillings = prev.filter(id => id !== ('panAbajo' as any) && id !== ('panArriba' as any));
+      return ['panAbajo', ...fillings, type, 'panArriba'] as IngredientType[];
     });
   };
 
-  const removeIngredient = (index: number) => {
-    setStack((prev) => prev.filter((_, i) => i !== index));
+  const removeIngredient = (type: IngredientType) => {
+    setStack((prev) => {
+      const fillings = prev.filter(id => id !== ('panAbajo' as any) && id !== ('panArriba' as any));
+      const lastIndex = fillings.lastIndexOf(type);
+      
+      if (lastIndex === -1) return prev;
+
+      const newFillings = [...fillings];
+      newFillings.splice(lastIndex, 1);
+      
+      return ['panAbajo', ...newFillings, 'panArriba'] as IngredientType[];
+    });
   };
 
   return (
