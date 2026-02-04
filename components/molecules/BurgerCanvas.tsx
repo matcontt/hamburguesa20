@@ -1,10 +1,11 @@
 import React, { Suspense } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Canvas } from '@react-three/fiber/native';
-import { OrbitControls, Environment, ContactShadows } from '@react-three/drei/native';
+import { OrbitControls, Stage, ContactShadows } from '@react-three/drei/native';
 import { useBurger } from '../../modules/builder/context/BurgerContext';
 import BurgerModel from './BurgerModel';
 
+// Tipado para evitar errores de TS en elementos intrínsecos
 const AmbientLight = 'ambientLight' as any;
 const PointLight = 'pointLight' as any;
 
@@ -15,72 +16,38 @@ export default function BurgerCanvas() {
     <View style={styles.container}>
       <Canvas
         shadows
-        camera={{ position: [0, 0.9, 2.8], fov: 50 }}
-        gl={{ 
-          powerPreference: "high-performance",
-          antialias: true,
-        }}
+        // Ajustamos la cámara para que la hamburguesa se vea bien sin zoom
+        camera={{ position: [0, 1.2, 3.5], fov: 45 }}
       >
         <Suspense fallback={null}>
-          {/* Iluminación */}
           <AmbientLight intensity={0.8} />
-          <PointLight position={[5, 5, 5]} intensity={1.2} />
-          <PointLight position={[-5, 3, -5]} intensity={0.5} />
+          <PointLight position={[5, 5, 5]} intensity={1} />
           
-          <Environment preset="city" />
+          <Stage adjustCamera={false} environment="city" intensity={0.5}>
+             <BurgerModel stack={stack} />
+          </Stage>
 
-          {/* Hamburguesa centrada */}
-          <group position={[0, 0, 0]}>
-            <BurgerModel stack={stack} />
-          </group>
-
-          {/* Sombras */}
           <ContactShadows 
-            position={[0, 0, 0]} 
-            opacity={0.3} 
-            scale={4} 
-            blur={2} 
-            far={2} 
+            position={[0, -0.05, 0]} 
+            opacity={0.4} 
+            scale={10} 
+            blur={2.5} 
+            far={1} 
           />
           
-          {/* CONTROLES MÓVILES OPTIMIZADOS */}
           <OrbitControls 
-            makeDefault
+            makeDefault 
+            // --- BLOQUEO DE ZOOM Y MOVIMIENTO ---
+            enableZoom={false} // Desactivamos el zoom (pinch)
+            enablePan={false}  // Desactivamos el desplazamiento (dos dedos)
+            // -------------------------------------
             
-            // ROTACIÓN - Un dedo
-            enableRotate={true}
-            rotateSpeed={0.7}
-            autoRotate={false}
-            
-            // ZOOM - Dos dedos (pellizcar)
-            enableZoom={true}
-            zoomSpeed={0.8}
-            minDistance={1.5}
-            maxDistance={5}
-            
-            // PAN deshabilitado
-            enablePan={false}
-            
-            // Límites verticales suaves
-            minPolarAngle={Math.PI / 8}     // No demasiado arriba
-            maxPolarAngle={Math.PI * 0.85}  // No demasiado abajo
-            
-            // Damping para movimiento fluido
-            enableDamping={true}
-            dampingFactor={0.06}
-            
-            // CONFIGURACIÓN CRÍTICA PARA MÓVIL
-            touches={{
-              ONE: 2,    // Un dedo = ROTATE (girar)
-              TWO: 1     // Dos dedos = DOLLY (zoom/pellizcar)
-            }}
-            
-            // Centro de la hamburguesa
-            target={[0, 0.8, 0]}
-            
-            // Sin límites de rotación horizontal
-            minAzimuthAngle={-Infinity}
-            maxAzimuthAngle={Infinity}
+            // --- CONFIGURACIÓN DE ROTACIÓN ---
+            minPolarAngle={Math.PI / 4}   // Límite para no ver la hamburguesa desde muy abajo
+            maxPolarAngle={Math.PI / 1.8} // Límite para no verla desde muy arriba
+            enableDamping={true}          // Inercia suave al soltar
+            dampingFactor={0.07}
+            rotateSpeed={0.8}             // Velocidad de rotación
           />
         </Suspense>
       </Canvas>
@@ -91,6 +58,6 @@ export default function BurgerCanvas() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#050505',
+    backgroundColor: '#050505' 
   },
 });
