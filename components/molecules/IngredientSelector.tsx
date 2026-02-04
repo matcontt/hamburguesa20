@@ -4,7 +4,7 @@ import { INGREDIENTS, UI_COLORS, IngredientType } from '../../lib/core/config';
 import { useBurger } from '../../modules/builder/context/BurgerContext';
 
 export default function IngredientSelector() {
-  const { addIngredient, removeIngredient, stack } = useBurger();
+  const { toggleIngredient, stack } = useBurger();
   const ingredientList = Object.values(INGREDIENTS).filter(ing => !ing.id.includes('pan'));
 
   return (
@@ -12,29 +12,34 @@ export default function IngredientSelector() {
       <Text style={styles.title}>Personaliza tu burger</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.list}>
         {ingredientList.map((item) => {
-          const count = stack.filter(id => id === item.id).length;
+          const isSelected = stack.includes(item.id);
+          
           return (
-            <View key={item.id} style={[styles.card, { borderColor: item.color }]}>
+            <TouchableOpacity 
+              key={item.id} 
+              style={[
+                styles.card, 
+                { borderColor: item.color },
+                isSelected && styles.cardSelected
+              ]}
+              onPress={() => toggleIngredient(item.id)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.name}>{item.name}</Text>
-              <View style={styles.controls}>
-                <TouchableOpacity 
-                  style={styles.btnSmall} 
-                  onPress={() => removeIngredient(item.id)}
-                >
-                  <Text style={styles.btnText}>-</Text>
-                </TouchableOpacity>
-                
-                <Text style={styles.countText}>{count}</Text>
-                
-                <TouchableOpacity 
-                  style={styles.btnSmall} 
-                  onPress={() => addIngredient(item.id)}
-                  disabled={count >= item.max}
-                >
-                  <Text style={styles.btnText}>+</Text>
-                </TouchableOpacity>
+              <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+              
+              <View style={[
+                styles.statusBadge,
+                isSelected && styles.statusBadgeActive
+              ]}>
+                <Text style={[
+                  styles.statusText,
+                  isSelected && styles.statusTextActive
+                ]}>
+                  {isSelected ? '✓ Agregado' : '+ Agregar'}
+                </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>
@@ -44,20 +49,55 @@ export default function IngredientSelector() {
 
 const styles = StyleSheet.create({
   container: { paddingVertical: 15 },
-  title: { color: '#888', marginLeft: 20, marginBottom: 10, fontSize: 12, textTransform: 'uppercase' },
-  list: { paddingHorizontal: 15 },
+  title: { 
+    color: '#888', 
+    marginLeft: 20, 
+    marginBottom: 10, 
+    fontSize: 12, 
+    textTransform: 'uppercase',
+    fontWeight: '600',
+  },
+  list: { paddingHorizontal: 15, gap: 8 },
   card: {
     backgroundColor: '#1A1A1A',
     borderRadius: 15,
     padding: 12,
-    marginHorizontal: 5,
     width: 110,
-    borderWidth: 1,
+    borderWidth: 2,
     alignItems: 'center'
   },
-  name: { color: '#FFF', fontSize: 12, fontWeight: 'bold', marginBottom: 10 },
-  controls: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  btnSmall: { backgroundColor: '#333', width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
-  btnText: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
-  countText: { color: UI_COLORS.primary, fontWeight: 'bold', fontSize: 16 }
+  cardSelected: {
+    backgroundColor: '#252520',
+    borderWidth: 3,
+  },
+  name: { 
+    color: '#FFF', 
+    fontSize: 12, 
+    fontWeight: 'bold', 
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  price: { 
+    color: UI_COLORS.primary, 
+    fontSize: 13, 
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  statusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: '#2A2A2A',
+  },
+  statusBadgeActive: {
+    backgroundColor: UI_COLORS.primary,
+  },
+  statusText: { 
+    color: '#888',
+    fontSize: 10, 
+    fontWeight: '600',
+  },
+  statusTextActive: {
+    color: '#000',
+  },
 });

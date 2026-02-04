@@ -5,34 +5,37 @@ import { UI_COLORS, INGREDIENTS } from '../../lib/core/config';
 import PriceTag from '../atoms/PriceTag';
 
 export default function OrderFooter() {
-  const { stack, setStack } = useBurger();
+  const { stack, clearBurger } = useBurger();
 
-  // Calculamos el precio basándonos en los ingredientes actuales
+  // Calcular precio total
   const totalPrice = stack.reduce((acc, id) => {
     const ingredient = INGREDIENTS[id];
     return acc + (ingredient ? ingredient.price : 0);
   }, 0);
 
-  // Función para resetear la hamburguesa al estado inicial
-  const handleReset = () => {
-    setStack(['panAbajo', 'panArriba']);
-  };
+  // Verificar si hay ingredientes además de los panes
+  const hasIngredients = stack.length > 2;
 
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        {/* Usamos el Átomo PriceTag */}
         <PriceTag label="Total" amount={totalPrice} />
         
         <View style={styles.buttonGroup}>
-          <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
+          <TouchableOpacity 
+            style={[styles.resetButton, !hasIngredients && styles.disabled]} 
+            onPress={clearBurger}
+            disabled={!hasIngredients}
+            activeOpacity={0.7}
+          >
             <Text style={styles.resetText}>Limpiar</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.orderButton, stack.length < 3 && styles.disabled]}
+            style={[styles.orderButton, !hasIngredients && styles.disabled]}
             onPress={() => alert('¡Pedido enviado!')}
-            disabled={stack.length < 3}
+            disabled={!hasIngredients}
+            activeOpacity={0.7}
           >
             <Text style={styles.orderText}>Ordenar</Text>
           </TouchableOpacity>
@@ -80,7 +83,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   disabled: {
-    backgroundColor: '#555',
-    opacity: 0.5,
+    opacity: 0.4,
   },
 });

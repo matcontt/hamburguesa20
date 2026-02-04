@@ -12,6 +12,19 @@ export interface Ingredient {
   max: number;
 }
 
+// NUEVO: Alturas exportadas para que BurgerModel las use
+export const HEIGHTS: Record<IngredientType, number> = {
+  panAbajo: 0.08,
+  carne1: 0.14,
+  carne2: 0.12,
+  carne3: 0.14,
+  pollo1: 0.18,
+  pollo2: 0.15,
+  queso1: 0.03,
+  queso2: 0.03,
+  panArriba: 0.1
+};
+
 export const INGREDIENTS: Record<IngredientType, Ingredient> = {
   panAbajo: { id: 'panAbajo', name: 'Pan Base', price: 0.5, color: '#D2B48C', max: 1 },
   panArriba: { id: 'panArriba', name: 'Pan Top', price: 0.5, color: '#D2B48C', max: 1 },
@@ -28,6 +41,6 @@ export const UI_COLORS = {
   background: '#050505',
   surface: '#121212',
   primary: '#F5A623',
-  secondary: '#FF4444', // Color añadido para reset/limpiar
+  secondary: '#FF4444',
   text: '#FFFFFF',
 };
