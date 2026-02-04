@@ -1,9 +1,13 @@
 import React, { Suspense } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Canvas } from '@react-three/fiber/native';
-import { PerspectiveCamera, OrbitControls, Stage } from '@react-three/drei/native';
+import { OrbitControls, Stage, ContactShadows } from '@react-three/drei/native';
 import { useBurger } from '../../modules/builder/context/BurgerContext';
-import BurgerModel from './BurgerModel'; // Lo crearemos en el siguiente paso
+import BurgerModel from './BurgerModel';
+
+// Etiquetas para evitar el berrinche de TS
+const AmbientLight = 'ambientLight' as any;
+const PointLight = 'pointLight' as any;
 
 export default function BurgerCanvas() {
   const { stack } = useBurger();
@@ -12,36 +16,31 @@ export default function BurgerCanvas() {
     <View style={styles.container}>
       <Canvas
         shadows
-        camera={{ position: [0, 2, 5], fov: 50 }}
-        onCreated={(state) => {
-          const gl = state.gl;
-          gl.setClearColor('#050505'); // Color de fondo oscuro premium
-        }}
+        camera={{ position: [0, 2, 5], fov: 40 }}
       >
         <Suspense fallback={null}>
-          <Stage intensity={0.5} environment="city" adjustCamera={false}>
-            {/* Aquí es donde se renderizará el modelo que depende del stack */}
-            <BurgerModel stack={stack} />
+          <AmbientLight intensity={0.7} />
+          <PointLight position={[10, 10, 10]} intensity={1} />
+          
+          {/* Corregido: Se eliminó contactShadow que causaba error de tipos */}
+          <Stage adjustCamera={true} environment="city" intensity={0.5}>
+             <BurgerModel stack={stack} />
           </Stage>
-          <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2} minPolarAngle={Math.PI / 4} />
+
+          {/* Usamos este para las sombras en el suelo, es más compatible */}
+          <ContactShadows opacity={0.4} scale={10} blur={2.5} far={4} />
+          
+          <OrbitControls 
+            enablePan={false} 
+            minPolarAngle={Math.PI / 4} 
+            maxPolarAngle={Math.PI / 2} 
+          />
         </Suspense>
       </Canvas>
-      
-      {/* Indicador de carga mientras el modelo GLB se descarga/procesa */}
-      <Suspense fallback={<ActivityIndicator size="large" color="#FFD700" style={styles.loader} />} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#050505',
-  },
-  loader: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -20 }, { translateY: -20 }],
-  },
+  container: { flex: 1, backgroundColor: '#050505' },
 });

@@ -1,9 +1,8 @@
 const { getDefaultConfig } = require('expo/metro-config');
 
-/** @type {import('expo/metro-config').Config} */
 const config = getDefaultConfig(__dirname);
 
-// Agregamos soporte para archivos de modelos 3D y assets comunes
+// ESTA LÍNEA ES LA QUE SOLUCIONA TU ERROR
 config.resolver.assetExts.push('glb', 'gltf', 'png', 'jpg');
 
 module.exports = config;

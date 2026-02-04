@@ -13,7 +13,7 @@ const HEIGHTS: Record<string, number> = {
 
 export default function BurgerModel({ stack }: { stack: IngredientType[] }) {
   // Cargamos el modelo
-  const { nodes } = useGLTF(require('../../../assets/models/hamburguesa.glb')) as any;
+  const { nodes } = useGLTF(require('../../assets/models/hamburguesa.glb')) as any;
 
   const parts = useMemo(() => {
     let currentY = 0;
