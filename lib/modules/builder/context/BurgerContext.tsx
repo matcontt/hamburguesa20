@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { IngredientType } from '../../../lib/core/config';
+import { IngredientType } from '../../../core/config';
 
 interface BurgerContextType {
   stack: IngredientType[];

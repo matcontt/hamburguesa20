@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { INGREDIENTS, UI_COLORS, IngredientType } from '../../lib/core/config';
-import { useBurger } from '../../modules/builder/context/BurgerContext';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { INGREDIENTS, UI_COLORS } from '../../lib/core/config';
+import { useBurger } from '../../lib/modules/builder/context/BurgerContext';
 
 export default function IngredientSelector() {
   const { toggleIngredient, stack } = useBurger();

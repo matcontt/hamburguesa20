@@ -1,8 +1,8 @@
+import { ContactShadows, OrbitControls, Stage } from '@react-three/drei/native';
+import { Canvas } from '@react-three/fiber/native';
 import React, { Suspense } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Canvas } from '@react-three/fiber/native';
-import { OrbitControls, Stage, ContactShadows } from '@react-three/drei/native';
-import { useBurger } from '../../modules/builder/context/BurgerContext';
+import { useBurger } from '../../lib/modules/builder/context/BurgerContext';
 import BurgerModel from './BurgerModel';
 
 // Tipado para evitar errores de TS en elementos intrínsecos

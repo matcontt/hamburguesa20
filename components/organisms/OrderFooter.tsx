@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { useBurger } from '../../modules/builder/context/BurgerContext';
-import { UI_COLORS, INGREDIENTS } from '../../lib/core/config';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { INGREDIENTS, UI_COLORS } from '../../lib/core/config';
+import { useBurger } from '../../lib/modules/builder/context/BurgerContext';
 import PriceTag from '../atoms/PriceTag';
 
 export default function OrderFooter() {
