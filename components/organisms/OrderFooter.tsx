@@ -1,11 +1,15 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
 import { INGREDIENTS, UI_COLORS } from '../../lib/core/config';
 import { useBurger } from '../../lib/modules/builder/context/BurgerContext';
+import { useAuth } from '../../lib/modules/auth/AuthProvider';
+import { supabase } from '../../lib/core/supabase/client.supabase';
 import PriceTag from '../atoms/PriceTag';
 
 export default function OrderFooter() {
   const { stack, clearBurger } = useBurger();
+  const { session } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   // Calcular precio total
   const totalPrice = stack.reduce((acc, id) => {
@@ -15,6 +19,52 @@ export default function OrderFooter() {
 
   // Verificar si hay ingredientes además de los panes
   const hasIngredients = stack.length > 2;
+
+  const handleOrder = async () => {
+    if (!session?.user.id) {
+      Alert.alert('Error', 'Debes iniciar sesión para ordenar');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      // Guardar el pedido en Supabase
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([{
+          user_id: session.user.id,
+          burger_items: stack, // Guardar los ingredientes
+          total_price: totalPrice,
+          status: 'on_way' // Estado del pedido
+        }])
+        .select();
+
+      if (error) {
+        console.error('Error creando pedido:', error);
+        Alert.alert('Error', 'No se pudo crear el pedido');
+        return;
+      }
+
+      console.log('✅ Pedido creado:', data);
+      
+      // Limpiar la hamburguesa
+      clearBurger();
+      
+      // Mostrar confirmación
+      Alert.alert(
+        '🎉 ¡Pedido realizado!',
+        'Minimiza la app para recibir la notificación de seguimiento',
+        [{ text: 'OK' }]
+      );
+
+    } catch (err) {
+      console.error('Error inesperado:', err);
+      Alert.alert('Error', 'Ocurrió un error inesperado');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -32,12 +82,16 @@ export default function OrderFooter() {
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.orderButton, !hasIngredients && styles.disabled]}
-            onPress={() => alert('¡Pedido enviado!')}
-            disabled={!hasIngredients}
+            style={[styles.orderButton, (!hasIngredients || loading) && styles.disabled]}
+            onPress={handleOrder}
+            disabled={!hasIngredients || loading}
             activeOpacity={0.7}
           >
-            <Text style={styles.orderText}>Ordenar</Text>
+            {loading ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text style={styles.orderText}>Ordenar</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -77,6 +131,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
   },
   orderText: {
     color: '#000',

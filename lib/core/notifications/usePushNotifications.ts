@@ -13,14 +13,15 @@ export const usePushNotifications = (userId?: string) => {
       try {
         const token = await NotificationAdapter.registerForPushNotificationsAsync();
         if (token) {
-          // Agregamos un pequeño delay de 1.5s para asegurar que el trigger 
-          // de creación de perfil en Supabase haya terminado
-          setTimeout(async () => {
-            await saveTokenToDatabase(token, userId);
-          }, 1500);
+          console.log('✅ Token obtenido:', token.substring(0, 30) + '...');
+          
+          // Esperar 3 segundos para que el perfil se cree
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          
+          await saveTokenToDatabase(token, userId);
         }
       } catch (error) {
-        console.error('❌ Error registrando notificaciones:', error);
+        console.error('❌ Error en registro:', error);
       }
     };
 
@@ -29,32 +30,37 @@ export const usePushNotifications = (userId?: string) => {
 };
 
 async function saveTokenToDatabase(token: string, userId: string) {
-  // Verificamos primero si el perfil existe para evitar el error 23503
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', userId)
-    .single();
+  console.log('💾 Guardando token para usuario:', userId);
+  
+  try {
+    // Opción 1: Eliminar registros anteriores de este token
+    const { error: deleteError } = await supabase
+      .from('devices')
+      .delete()
+      .eq('token', token);
+    
+    if (deleteError) {
+      console.log('⚠️ No se pudo eliminar token anterior:', deleteError.message);
+    }
+    
+    // Opción 2: Insertar el nuevo registro
+    const { data, error } = await supabase
+      .from('devices')
+      .insert({ 
+        user_id: userId,
+        token: token,
+        platform: Platform.OS,
+        last_used_at: new Date().toISOString()
+      })
+      .select();
 
-  if (!profile) {
-    console.warn('⚠️ El perfil aún no existe en la DB. Reintentando en breve...');
-    return;
-  }
-
-  const { error } = await supabase
-    .from('devices')
-    .upsert({ 
-      user_id: userId,
-      token: token,
-      platform: Platform.OS,
-      last_used_at: new Date().toISOString()
-    }, { 
-      onConflict: 'token' 
-    });
-
-  if (error) {
-    console.error('❌ Error guardando device (Code 23503?):', error.message);
-  } else {
-    console.log('✅ Dispositivo registrado en Supabase');
+    if (error) {
+      console.error('❌ Error guardando token:', error.message);
+      console.error('Código error:', error.code);
+    } else {
+      console.log('✅ Token guardado correctamente');
+    }
+  } catch (err) {
+    console.error('❌ Error inesperado:', err);
   }
 }

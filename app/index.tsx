@@ -1,21 +1,23 @@
 import React from 'react';
-import { StyleSheet, View, StatusBar, Text, TouchableOpacity } from 'react-native';
+import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import BurgerCanvas from '../components/molecules/BurgerCanvas';
 import IngredientSelector from '../components/molecules/IngredientSelector';
 import OrderFooter from '../components/organisms/OrderFooter';
-import { UI_COLORS } from '../lib/core/config';
 import { useBurger } from '../lib//modules/builder/context/BurgerContext';
+import { UI_COLORS } from '../lib/core/config';
 import { useAuth } from '../lib/modules/auth/AuthProvider';
 
 export default function App() {
   const { stack } = useBurger();
   const { signOut } = useAuth();
+  const { clearBurger } = useBurger();
   
   const ingredientCount = stack.filter(id => !id.includes('pan')).length;
 
   const handleLogout = async () => {
     try {
+      clearBurger();
       await signOut();
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
