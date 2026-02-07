@@ -1,43 +1,46 @@
-import { usePushNotifications } from "@/lib/core/notifications/usePushNotifications";
-import { AuthProvider, useAuth } from "@/lib/modules/auth/AuthProvider";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
+// 1. Importamos ambos Providers
+import { AuthProvider, useAuth } from "../lib//modules/auth/AuthProvider";
+import { BurgerProvider } from "../lib/modules/builder/context/BurgerContext"; // Ajusta esta ruta si es necesario
+import { usePushNotifications } from "../lib/core/notifications/usePushNotifications";
 
 function AuthLayout() {
   const { session, loading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
-  // Iniciar sistema de notificaciones
-  const userId = session?.user.id;
-  usePushNotifications(userId);
+  // Iniciamos notificaciones
+  usePushNotifications(session?.user.id);
 
-  // Protección de rutas
   useEffect(() => {
     if (loading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!session && !inAuthGroup) {
-      // No hay usuario y no está en login -> Redirigir a login
-      router.replace('./(auth)/login');
+      router.replace('/(auth)/login');
     } else if (session && inAuthGroup) {
-      // Hay usuario y está en login -> Redirigir a home
       router.replace('/');
     }
   }, [session, loading, segments]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)/login" />
-      <Stack.Screen name="(auth)/register" />
-      <Stack.Screen name="index" />
-    </Stack>
+    // 2. Envolvemos el Stack con el BurgerProvider aquí
+    // Así, cualquier pantalla dentro (como index) podrá usar useBurger()
+    <BurgerProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)/login" />
+        <Stack.Screen name="(auth)/register" />
+      </Stack>
+    </BurgerProvider>
   );
 }
 
 export default function RootLayout() {
   return (
+    // 3. El AuthProvider siempre va al inicio de todo
     <AuthProvider>
       <AuthLayout />
     </AuthProvider>
