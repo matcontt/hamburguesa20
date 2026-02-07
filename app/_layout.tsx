@@ -1,8 +1,7 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
-// 1. Importamos ambos Providers
-import { AuthProvider, useAuth } from "../lib//modules/auth/AuthProvider";
-import { BurgerProvider } from "../lib/modules/builder/context/BurgerContext"; // Ajusta esta ruta si es necesario
+import { AuthProvider, useAuth } from "../lib/modules/auth/AuthProvider";
+import { BurgerProvider } from "../lib/modules/builder/context/BurgerContext";
 import { usePushNotifications } from "../lib/core/notifications/usePushNotifications";
 
 function AuthLayout() {
@@ -10,12 +9,10 @@ function AuthLayout() {
   const segments = useSegments();
   const router = useRouter();
 
-  // Iniciamos notificaciones
   usePushNotifications(session?.user.id);
 
   useEffect(() => {
     if (loading) return;
-
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!session && !inAuthGroup) {
@@ -26,8 +23,6 @@ function AuthLayout() {
   }, [session, loading, segments]);
 
   return (
-    // 2. Envolvemos el Stack con el BurgerProvider aquí
-    // Así, cualquier pantalla dentro (como index) podrá usar useBurger()
     <BurgerProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
@@ -40,7 +35,6 @@ function AuthLayout() {
 
 export default function RootLayout() {
   return (
-    // 3. El AuthProvider siempre va al inicio de todo
     <AuthProvider>
       <AuthLayout />
     </AuthProvider>

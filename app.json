@@ -54,8 +54,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "gwbrsjnwyczihylfsafd"
-      }
-    }
+        "projectId": "e680f622-f78a-41e7-ab5c-90576cbbe6d5"
+      },
+      "router": {}
+    },
+    "owner": "matcontt"
   }
 }
